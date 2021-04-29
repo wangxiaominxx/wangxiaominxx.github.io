@@ -1,0 +1,166 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>使用 Cloudflare WARP 给 VPS 服务器免费添加IPv6 网络 | Sakura tree</title><meta name="description" content="原理WARP 是 Cloud­flare 提供的一项基于 Wire­Guard 的网络流量安全及加速服务，能够让你通过连接到 Cloud­flare 的边缘节点实现隐私保护及链路优化。其连接入口为双栈 (IPv4&#x2F;​IPv6)，因此单栈服务器可以连接到 WARP 来获取额外的网络连通性支持。比如可以让仅具有 IPv6 的服务器直接访问 IPv4 网络，不再局限于 DNS64 的束缚，能自定义任意"><meta name="author" content="Hesa"><meta name="copyright" content="Hesa"><meta name="format-detection" content="telephone=no"><link rel="shortcut icon" href="/img/favicon.ico"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="dns-prefetch" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="https://fonts.googleapis.com" crossorigin="crossorigin"/><link rel="dns-prefetch" href="https://fonts.googleapis.com"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="dns-prefetch" href="//busuanzi.ibruce.info"/><meta name="twitter:card" content="summary"><meta name="twitter:title" content="使用 Cloudflare WARP 给 VPS 服务器免费添加IPv6 网络"><meta name="twitter:description" content="原理WARP 是 Cloud­flare 提供的一项基于 Wire­Guard 的网络流量安全及加速服务，能够让你通过连接到 Cloud­flare 的边缘节点实现隐私保护及链路优化。其连接入口为双栈 (IPv4&#x2F;​IPv6)，因此单栈服务器可以连接到 WARP 来获取额外的网络连通性支持。比如可以让仅具有 IPv6 的服务器直接访问 IPv4 网络，不再局限于 DNS64 的束缚，能自定义任意"><meta name="twitter:image" content="https://i.loli.net/2021/04/12/NvTsDuktYahmzKG.jpg"><meta property="og:type" content="article"><meta property="og:title" content="使用 Cloudflare WARP 给 VPS 服务器免费添加IPv6 网络"><meta property="og:url" content="http://yoursite.com/2021/04/30/%E4%BD%BF%E7%94%A8%20Cloudflare%20WARP%20%E7%BB%99%20VPS%20%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%85%8D%E8%B4%B9%E6%B7%BB%E5%8A%A0IPv6%20%E7%BD%91%E7%BB%9C/"><meta property="og:site_name" content="Sakura tree"><meta property="og:description" content="原理WARP 是 Cloud­flare 提供的一项基于 Wire­Guard 的网络流量安全及加速服务，能够让你通过连接到 Cloud­flare 的边缘节点实现隐私保护及链路优化。其连接入口为双栈 (IPv4&#x2F;​IPv6)，因此单栈服务器可以连接到 WARP 来获取额外的网络连通性支持。比如可以让仅具有 IPv6 的服务器直接访问 IPv4 网络，不再局限于 DNS64 的束缚，能自定义任意"><meta property="og:image" content="https://i.loli.net/2021/04/12/NvTsDuktYahmzKG.jpg"><meta property="article:published_time" content="2021-04-29T18:32:37.594Z"><meta property="article:modified_time" content="2021-04-29T18:33:25.580Z"><script src="https://cdn.jsdelivr.net/npm/js-cookie/dist/js.cookie.min.js"></script><script>var autoChangeMode = '1'
+var t = Cookies.get("theme")
+if (autoChangeMode == '1'){
+  var isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches
+  var isLightMode = window.matchMedia("(prefers-color-scheme: light)").matches
+  var isNotSpecified = window.matchMedia("(prefers-color-scheme: no-preference)").matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined){
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport){
+      console.log('You specified no preference for a color scheme or your browser does not support it. I Schedule dark mode during night time.')
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour < 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+  }
+  } else if (t == 'light') activateLightMode()
+  else activateDarkMode()
+
+} else if (autoChangeMode == '2'){
+  now = new Date();
+  hour = now.getHours();
+  isNight = hour < 6 || hour >= 18
+  if(t === undefined) isNight? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode() 
+} else {
+  if ( t == 'dark' ) activateDarkMode()
+  else if ( t == 'light') activateLightMode()
+}
+
+function activateDarkMode(){
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null){
+    document.querySelector('meta[name="theme-color"]').setAttribute('content','#000')
+  }
+}
+function activateLightMode(){
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null){
+  document.querySelector('meta[name="theme-color"]').setAttribute('content','#fff')
+  }
+}</script><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@latest/css/font-awesome.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><link rel="canonical" href="http://yoursite.com/2021/04/30/%E4%BD%BF%E7%94%A8%20Cloudflare%20WARP%20%E7%BB%99%20VPS%20%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%85%8D%E8%B4%B9%E6%B7%BB%E5%8A%A0IPv6%20%E7%BD%91%E7%BB%9C/"><link rel="next" title="Google Cloud 转 SSH" href="http://yoursite.com/2021/04/29/Google%20Cluod%E8%BD%ACssh/"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"cookieDomain":"https://xxx/","msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime_unit: '天',
+  runtime: true,
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  baiduPush: false,
+  highlightCopy: true,
+  highlightLang: true,
+  highlightShrink: 'false',
+  isFontAwesomeV5: false,
+  isPhotoFigcaption: false
+  
+}</script><script>var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isSidebar: false  
+  }</script><noscript><style>
+#page-header {
+  opacity: 1
+}
+.justified-gallery img{
+  opacity: 1
+}
+</style></noscript><meta name="generator" content="Hexo 5.2.0"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/ity.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">5</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page"><i class="fa-fw fa fa-list" aria-hidden="true"></i><span> 清单</span><i class="fa fa-chevron-down menus-expand" aria-hidden="true"></i></a><ul class="menus_item_child"><li><a class="site-page" href="/music/"><i class="fa-fw fa fa-music"></i><span> 音乐</span></a></li><li><a class="site-page" href="/movies/"><i class="fa-fw fa fa-film"></i><span> 电影</span></a></li></ul></div></div></div></div><div id="body-wrap"><div class="post-bg" id="nav" style="background-image: url(https://i.loli.net/2021/04/12/NvTsDuktYahmzKG.jpg)"><div id="page-header"><span class="pull_left" id="blog_name"><a class="blog_title" id="site-name" href="/">Sakura tree</a></span><span class="pull_right menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page"><i class="fa-fw fa fa-list" aria-hidden="true"></i><span> 清单</span><i class="fa fa-chevron-down menus-expand" aria-hidden="true"></i></a><ul class="menus_item_child"><li><a class="site-page" href="/music/"><i class="fa-fw fa fa-music"></i><span> 音乐</span></a></li><li><a class="site-page" href="/movies/"><i class="fa-fw fa fa-film"></i><span> 电影</span></a></li></ul></div></div><span class="toggle-menu close"><a class="site-page"><i class="fa fa-bars fa-fw" aria-hidden="true"></i></a></span></span></div><div id="post-info"><div id="post-title"><div class="posttitle">使用 Cloudflare WARP 给 VPS 服务器免费添加IPv6 网络</div></div><div id="post-meta"><div class="meta-firstline"><time class="post-meta__date"><span class="post-meta__date-created" title="发表于 2021-04-30 02:32:37"><i class="fa fa-calendar" aria-hidden="true"></i> 发表于 2021-04-30</span><span class="post-meta__separator">|</span><span class="post-meta__date-updated" title="更新于 2021-04-30 02:33:25"><i class="fa fa-history" aria-hidden="true"></i> 更新于 2021-04-30</span></time></div><div class="meta-secondline"> </div><div class="meta-thirdline"><span class="post-meta-pv-cv"><i class="fa fa-eye post-meta__icon" aria-hidden="true"> </i><span>阅读量:</span><span id="busuanzi_value_page_pv"></span></span><span class="post-meta-commentcount"></span></div></div></div></div><main class="layout_post" id="content-inner"><article id="post"><div id="article-container"><p><strong>原理</strong><br>WARP 是 Cloud­flare 提供的一项基于 Wire­Guard 的网络流量安全及加速服务，能够让你通过连接到 Cloud­flare 的边缘节点实现隐私保护及链路优化。其连接入口为双栈 (IPv4/​IPv6)，因此单栈服务器可以连接到 WARP 来获取额外的网络连通性支持。<br>比如可以让仅具有 IPv6 的服务器直接访问 IPv4 网络，不再局限于 DNS64 的束缚，能自定义任意 DNS 解析服务器，对于科学上网会有很大的帮助；也能让仅具有 IPv4 的服务器获得 IPv6 网络的访问能力，可以作为 IPv6 Only VPS 的 SSH 跳板。</p>
+<p><strong>翻译成人话</strong><br>让你的vps通过这种方式有了ipv6，从而解锁服务器所在地的流媒体，比如Netflix。</p>
+<h2 id="安装-WireGuard"><a href="#安装-WireGuard" class="headerlink" title="安装 WireGuard"></a>安装 WireGuard</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">apt update</span><br><span class="line"></span><br><span class="line">apt install curl sudo lsb-release -y</span><br></pre></td></tr></table></figure>
+
+<p><strong>添加 back­ports 源</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">echo &quot;deb http:&#x2F;&#x2F;deb.debian.org&#x2F;debian $(lsb_release -sc)-backports main&quot; | sudo tee &#x2F;etc&#x2F;apt&#x2F;sources.list.d&#x2F;backports.list</span><br><span class="line">su root </span><br><span class="line">sudo apt update</span><br></pre></td></tr></table></figure>
+
+<p><strong>安装网络工具包</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install net-tools iproute2 openresolv dnsutils -y</span><br></pre></td></tr></table></figure>
+
+<p><strong>安装 wireguard-tools</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install wireguard-tools --no-install-recommends</span><br></pre></td></tr></table></figure>
+
+<p>先执行 uname -r 命令查看内核版本。如果是 5.6 以上内核则已经集成了 Wire­Guard ，就不需要安装了。如果不是，执行下面的命令</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt -t $(lsb_release -sc)-backports install linux-image-$(dpkg --print-architecture) linux-headers-$(dpkg --print-architecture) --install-recommends -y</span><br></pre></td></tr></table></figure>
+
+<p><strong>重启</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">reboot</span><br></pre></td></tr></table></figure>
+
+<p><strong>查看版本（ 5.6 以上就可以了）</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">uname -r</span><br></pre></td></tr></table></figure>
+
+<h2 id="使用-wgcf-生成-WireGuard-配置文件"><a href="#使用-wgcf-生成-WireGuard-配置文件" class="headerlink" title="使用 wgcf 生成 WireGuard 配置文件"></a>使用 wgcf 生成 WireGuard 配置文件</h2><p>wgcf 是 Cloud­flare WARP 的非官方 CLI 工具，它可以模拟 WARP 客户端注册账号，并生成通用的 Wire­Guard 配置文件。</p>
+<p><strong>安装 wgcf</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -fsSL git.io&#x2F;wgcf.sh | sudo bash</span><br></pre></td></tr></table></figure>
+
+<p><strong>注册 WARP 账户 (将生成 wgcf-account.toml 文件保存账户信息)</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wgcf register</span><br></pre></td></tr></table></figure>
+
+<p><strong>生成 Wire­Guard 配置文件 (wgcf-profile.conf)</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wgcf generate</span><br></pre></td></tr></table></figure>
+
+<p>生成的两个文件记得备份好，尤其是 wgcf-profile.conf，万一未来工具失效、重装系统后可能还用得着。</p>
+<p><strong>编辑 WireGuard 配置文件</strong><br>编辑wgcf-profile.conf文件，其中可以在服务器端解析 engage.cloudflareclient.com 的ip</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nslookup engage.cloudflareclient.com</span><br></pre></td></tr></table></figure>
+
+<p>但大概率解析的结果为 162.159.192.1</p>
+<p>将配置文件中的 engage.cloudflareclient.com 替换为 162.159.192.1，并删除 AllowedIPs = 0.0.0.0/0。即配置文件中 [Peer] 部分为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[Peer]</span><br><span class="line">PublicKey &#x3D; bmXOC+F1FxEMF9dyiK2H5&#x2F;1SUtzH0JuVo51h2wPfgyo&#x3D;</span><br><span class="line">AllowedIPs &#x3D; ::&#x2F;0</span><br><span class="line">Endpoint &#x3D; 162.159.192.1:2408</span><br></pre></td></tr></table></figure>
+
+<p><strong>额外操作</strong><br>每个人的vps配置文件中默认的 DNS 都不一样， 1.1.1.1。由于它将替换掉系统中的 DNS 设置 (vi /etc/resolv.conf)，同时为了防止单 DNS 服务器故障导致无法解析，建议使用不同组织提供的公共 DNS 服务器组合。以下配置供参考，小伙伴们请根据实际情况来填写。<br>DNS = 9.9.9.10,8.8.8.8,1.1.1.1，8.8.4.4</p>
+<h2 id="启用-WireGuard-网络接口"><a href="#启用-WireGuard-网络接口" class="headerlink" title="启用 WireGuard 网络接口"></a>启用 WireGuard 网络接口</h2><p>将 Wire­Guard 配置文件复制到 /etc/wireguard/ 并命名为 wgcf.conf。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo cp wgcf-profile.conf &#x2F;etc&#x2F;wireguard&#x2F;wgcf.conf</span><br></pre></td></tr></table></figure>
+
+<p>开启网络接口（命令中的 wgcf 对应的是配置文件 wgcf.conf 的文件名前缀）。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo wg-quick up wgcf</span><br></pre></td></tr></table></figure>
+
+<p><img src="/" class="lazyload" data-src="https://i.loli.net/2021/03/09/QMphdRyfz5DVrJX.png"  alt="开启网络接口"></p>
+<p>行执行<code>ip a</code>命令，此时能看到名为wgcf的网络接口，类似于下面这张图：<br><img src="/" class="lazyload" data-src="https://i.loli.net/2021/03/09/axuQEGmbtZVC6YT.png"  alt="名为wgcf的网络接口"></p>
+<p>执行以下命令检查是否连通。同时也能看到正在使用的是 Cloud­flare 的网络。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -6 ip.p3terx.com</span><br></pre></td></tr></table></figure>
+
+<p>测试完成后关闭相关接口，因为这样配置只是临时性的。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo wg-quick down wgcf</span><br></pre></td></tr></table></figure>
+
+<p>正式启用 Wire­Guard 网络接口</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># 启用守护进程</span><br><span class="line">sudo systemctl start wg-quick@wgcf</span><br><span class="line"># 设置开机启动</span><br><span class="line">sudo systemctl enable wg-quick@wgcf</span><br></pre></td></tr></table></figure>
+
+<h2 id="安装xray一键脚本"><a href="#安装xray一键脚本" class="headerlink" title="安装xray一键脚本"></a>安装xray一键脚本</h2><p>这里建议安装wulabing大佬的脚本，七合一的修改方式略有不同，大家仔细研究</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget -N --no-check-certificate -q -O install.sh &quot;https:&#x2F;&#x2F;raw.githubusercontent.com&#x2F;wulabing&#x2F;Xray_onekey&#x2F;main&#x2F;install.sh&quot; &amp;&amp; chmod +x install.sh &amp;&amp; bash install.sh</span><br></pre></td></tr></table></figure>
+
+<h2 id="修改xray的ipv6优先"><a href="#修改xray的ipv6优先" class="headerlink" title="修改xray的ipv6优先"></a>修改xray的ipv6优先</h2><h1 id="xray配置文件目录地址"><a href="#xray配置文件目录地址" class="headerlink" title="xray配置文件目录地址"></a>xray配置文件目录地址</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;usr&#x2F;local&#x2F;etc&#x2F;xray&#x2F;</span><br></pre></td></tr></table></figure>
+
+<h1 id="编辑config-json"><a href="#编辑config-json" class="headerlink" title="编辑config.json"></a>编辑config.json</h1><h1 id="替换整个-“outbounds”命令"><a href="#替换整个-“outbounds”命令" class="headerlink" title="替换整个 “outbounds”命令"></a>替换整个 “outbounds”命令</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"> &quot;outbounds&quot;: [</span><br><span class="line">    &#123;</span><br><span class="line">      &quot;tag&quot;:&quot;IP4_out&quot;,</span><br><span class="line">      &quot;protocol&quot;: &quot;freedom&quot;,</span><br><span class="line">      &quot;settings&quot;: &#123;&#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    &#123;</span><br><span class="line">      &quot;tag&quot;:&quot;IP6_out&quot;,</span><br><span class="line">      &quot;protocol&quot;: &quot;freedom&quot;,</span><br><span class="line">      &quot;settings&quot;: &#123;</span><br><span class="line">        &quot;domainStrategy&quot;: &quot;UseIPv6&quot; &#x2F;&#x2F; 指定使用 IPv6</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  ],</span><br><span class="line">  &quot;routing&quot;: &#123;</span><br><span class="line">    &quot;rules&quot;: [</span><br><span class="line">      &#123;</span><br><span class="line">        &quot;type&quot;: &quot;field&quot;,</span><br><span class="line">        &quot;outboundTag&quot;: &quot;IP6_out&quot;,</span><br><span class="line">        &quot;domain&quot;: [&quot;geosite:netflix&quot;] &#x2F;&#x2F; netflix 走 IPv6</span><br><span class="line">      &#125;,</span><br><span class="line">      &#123;</span><br><span class="line">        &quot;type&quot;: &quot;field&quot;,</span><br><span class="line">        &quot;outboundTag&quot;: &quot;IP4_out&quot;,</span><br><span class="line">        &quot;network&quot;: &quot;udp,tcp&quot;&#x2F;&#x2F; 其余走 IPv4</span><br><span class="line">      &#125;</span><br><span class="line">    ]</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>另外的使用场景：例如google</strong><br>还有一种情况，就是你的小鸡使用的是垃圾ip，每次看YouTube的时候或是看google的时候，都会跳出提示，让你验证，这个是因为你的vps的ipv4被拉黑或是共享ip。每次提示都很烦人，那么我们也可以把google和YouTube加入的走ipv6的线路。<br>还是上面的代码，只有改其中一行就行</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&quot;domain&quot;: [&quot;geosite:netflix&quot;,&quot;geosite:google&quot;,&quot;geosite:youtube&quot;] &#x2F;&#x2F; netflix google YouTube走 IPv6</span><br></pre></td></tr></table></figure>
+
+<p><strong>xray重启</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl restart xray</span><br></pre></td></tr></table></figure>
+
+<p><strong>检查是否xray报错</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl status xray</span><br></pre></td></tr></table></figure>
+
+<p><strong>复查其他线路有没有走ipv6</strong><br><a target="_blank" rel="noopener" href="https://test-ipv6.com/index.html.zh_CN">https://test-ipv6.com/index.html.zh_CN</a></p>
+<p><strong>ipv6测速</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">curl -fsSL git.io&#x2F;speedtest-cli.sh | sudo bash</span><br><span class="line">speedtest</span><br></pre></td></tr></table></figure>
+
+<p><strong>解锁检测</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install -y curl jq 2&gt; &#x2F;dev&#x2F;null || apt install -y curl jq &amp;&amp; bash &lt;(curl -sSL https:&#x2F;&#x2F;raw.githubusercontent.com&#x2F;Netflixxp&#x2F;NF&#x2F;main&#x2F;nf.sh)</span><br></pre></td></tr></table></figure>
+
+<p>ps:教程来源于<br><a target="_blank" rel="noopener" href="https://p3terx.com/">https://p3terx.com/</a><br><a target="_blank" rel="noopener" href="https://bbs.zsxwz.com/">https://bbs.zsxwz.com/</a><br><a target="_blank" rel="noopener" href="https://toutyrater.github.io/app/netflix.html">https://toutyrater.github.io/app/netflix.html</a></p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">Hesa</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://yoursite.com/2021/04/30/%E4%BD%BF%E7%94%A8%20Cloudflare%20WARP%20%E7%BB%99%20VPS%20%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%85%8D%E8%B4%B9%E6%B7%BB%E5%8A%A0IPv6%20%E7%BD%91%E7%BB%9C/">http://yoursite.com/2021/04/30/%E4%BD%BF%E7%94%A8%20Cloudflare%20WARP%20%E7%BB%99%20VPS%20%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%85%8D%E8%B4%B9%E6%B7%BB%E5%8A%A0IPv6%20%E7%BD%91%E7%BB%9C/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://yoursite.com" target="_blank">Sakura tree</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/04/12/NvTsDuktYahmzKG.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"/><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js"></script></div></div><div class="post-reward"><a class="reward-button button--primary button--animated"> <i class="fa fa-qrcode"></i> 打赏<div class="reward-main"><ul class="reward-all"><li class="reward-item"><img class="lazyload post-qr-code__img" src="/img/wechat.jpg" alt="微信"/><div class="post-qr-code__desc">微信</div></li><li class="reward-item"><img class="lazyload post-qr-code__img" src="/img/alipay.jpg" alt="支付寶"/><div class="post-qr-code__desc">支付寶</div></li></ul></div></a></div><nav class="pagination_post" id="pagination"><div class="next-post pull-full"><a href="/2021/04/29/Google%20Cluod%E8%BD%ACssh/"><img class="next_cover lazyload" data-src="https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=1750208429,1514486128&amp;fm=26&amp;gp=0.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Google Cloud 转 SSH</div></div></a></div></nav></article></main><footer id="footer" style="background-image: url(https://i.loli.net/2021/04/12/NvTsDuktYahmzKG.jpg)" data-type="photo"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By Hesa</div><div class="framework-info"><span>驱动 </span><a target="_blank" rel="noopener" href="https://hexo.io"><span>Hexo</span></a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly"><span>Butterfly</span></a></div></div></footer></div><section class="rightside" id="rightside"><div id="rightside-config-hide"><i class="fa fa-book" id="readmode" title="阅读模式"></i><i class="fa fa-plus" id="font_plus" title="放大字体"></i><i class="fa fa-minus" id="font_minus" title="缩小字体"></i><a class="translate_chn_to_cht" id="translateLink" href="javascript:translatePage();" title="简繁转换" target="_self">繁</a><i class="darkmode fa fa-moon-o" id="darkmode" title="夜间模式"></i></div><div id="rightside-config-show"><div id="rightside_config" title="设置"><i class="fa fa-cog" aria-hidden="true"></i></div><i class="fa fa-arrow-up" id="go-up" title="回到顶部" aria-hidden="true"></i></div></section><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page@latest/instantpage.min.js" type="module"></script><script src="https://cdn.jsdelivr.net/npm/lazysizes@latest/lazysizes.min.js" async=""></script></body></html>
